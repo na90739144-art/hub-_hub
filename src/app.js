@@ -197,7 +197,6 @@ function renderMessages() {
         m.role === "ai"
           ? `<div class="msg-actions">
         <button onclick="copyMsg(${i})">📋 کپی</button>
-        <button onclick="speakMsg(${i})">🔊 پخش صوتی</button>
       </div>`
           : ""
       }
@@ -213,12 +212,6 @@ function escapeHtml(s) {
 }
 function copyMsg(i) {
   navigator.clipboard && navigator.clipboard.writeText(currentMessages[i].text);
-}
-function speakMsg(i) {
-  if (!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(currentMessages[i].text);
-  u.lang = currentSection === "idea" ? "en-US" : "fa-IR";
-  speechSynthesis.speak(u);
 }
 
 function sendMessage() {
