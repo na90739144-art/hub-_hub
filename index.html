@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hub Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- AUTH VIEW -->
+<div id="authView" class="view active">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="logo">Hub Hub</div>
+      <div class="sub">صفر تا صد برنامه‌نویسی با هوش مصنوعی</div>
+    </div>
+
+    <form id="loginForm">
+      <div class="field"><label>ایمیل</label><input type="email" id="loginEmail" required></div>
+      <div class="field"><label>رمز عبور</label><input type="password" id="loginPass" required></div>
+      <div class="err" id="loginErr"></div>
+      <button type="submit" class="btn-primary">ورود</button>
+      <div class="switch-link">حساب نداری؟ <a onclick="showForm('register')">ثبت‌نام کن</a></div>
+    </form>
+
+    <form id="registerForm" style="display:none">
+      <div class="field"><label>نام کامل</label><input type="text" id="regName" required></div>
+      <div class="field"><label>ایمیل</label><input type="email" id="regEmail" required></div>
+      <div class="field"><label>رمز عبور</label><input type="password" id="regPass" required></div>
+      <div class="field"><label>تکرار رمز عبور</label><input type="password" id="regPass2" required></div>
+      <div class="err" id="regErr"></div>
+      <button type="submit" class="btn-primary">ثبت‌نام</button>
+      <div class="switch-link">حساب داری؟ <a onclick="showForm('login')">وارد شو</a></div>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardView" class="view">
+  <div class="topbar">
+    <button class="icon-btn" onclick="openDrawer()">☰</button>
+    <div style="font-weight:700;color:var(--gold)">Hub Hub</div>
+  </div>
+  <h2 id="greetName">خوش اومدی</h2>
+  <p class="greet">یکی از بخش‌ها رو انتخاب کن تا شروع کنیم</p>
+  <div class="card-grid">
+    <button class="card" onclick="openChat('idea')">
+      <div class="emoji">💡</div><h3>ایده‌ات را بگو، پرامپت حرفه‌ای بگیر</h3>
+      <p>یک ایده ساده را به یک پرامپت حرفه‌ای و کامل برای هوش مصنوعی تبدیل کن.</p>
+    </button>
+    <button class="card" onclick="openChat('website')">
+      <div class="emoji">🌐</div><h3>طراحی وب‌سایتت</h3>
+      <p>ایده‌ی سایتت را توضیح بده تا پروژه از صفر تا صد ساخته شود.</p>
+    </button>
+    <button class="card" onclick="openChat('android')">
+      <div class="emoji">📱</div><h3>طراحی اپلیکیشن اندروید</h3>
+      <p>ایده‌ی اپلیکیشنت را بگو تا پروژه‌ی کامل آن ساخته شود.</p>
+    </button>
+    <button class="card" onclick="openChat('consultant')">
+      <div class="emoji">👨‍💻</div><h3>مشاور پروژه</h3>
+      <p>درباره‌ی معماری، تکنولوژی‌ها و مسیر توسعه‌ی پروژه‌ات مشورت بگیر.</p>
+    </button>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="aboutView" class="view">
+  <div class="topbar">
+    <button class="exit-btn" onclick="goDashboard()">🚪 خروج</button>
+    <div style="font-weight:700;color:var(--gold)">درباره‌ی هاب هاب</div>
+  </div>
+  <p style="line-height:2; color:var(--muted); font-size:14px">
+    Hub Hub یک پلتفرم هوش مصنوعی برای برنامه‌نویسی است که ایده‌های تو را به پرامپت حرفه‌ای، پروژه‌ی وب‌سایت، پروژه‌ی اندروید و مشاوره‌ی فنی تبدیل می‌کند.
+    این نسخه یک پروتوتایپ کاملاً سمت کاربر است؛ برای اتصال هوش مصنوعی واقعی، کلید API لازم است.
+  </p>
+</div>
+
+<!-- HISTORY -->
+<div id="historyView" class="view">
+  <div class="topbar">
+    <button class="exit-btn" onclick="goDashboard()">🚪 خروج</button>
+    <div style="font-weight:700;color:var(--gold)">تاریخچه</div>
+  </div>
+  <div id="historyBody"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chatView" class="view">
+  <div class="chat-header">
+    <button class="exit-btn" onclick="goDashboard()">🚪 خروج</button>
+    <div class="chat-title" id="chatTitle"></div>
+  </div>
+  <div class="toolbar-row">
+    <button onclick="clearChat()">🗑️ پاک کردن گفتگو</button>
+  </div>
+  <div class="messages" id="messages"></div>
+  <div class="chat-input-bar">
+    <button class="round-btn" id="micBtn" onclick="toggleMic()">🎙️</button>
+    <input type="text" id="chatInput" placeholder="پیامت را بنویس..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button class="round-btn send" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <h3>منو</h3>
+  <button class="drawer-item" onclick="closeDrawer()">سازنده: نیما حجتی</button>
+  <button class="drawer-item" onclick="closeDrawer(); showView('about')">درباره‌ی هوش مصنوعی</button>
+  <button class="drawer-item" onclick="closeDrawer(); openHistory()">تاریخچه</button>
+  <button class="drawer-item" onclick="logout()">خروج از حساب</button>
+  <div class="creator">Hub Hub — ساخته‌ی نیما حجتی</div>
+</div>
+
+<script src="src/ai-service.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

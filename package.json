@@ -1,0 +1,14 @@
+{
+  "name": "hub-hub",
+  "version": "1.0.0",
+  "description": "Hub Hub — Zero to One Hundred Programming with AI. Created by Nima Hojjati.",
+  "author": "Nima Hojjati",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

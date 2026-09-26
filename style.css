@@ -1,0 +1,114 @@
+:root{
+  --bg:#0B0E13; --surface:#12161F; --surface2:#181D28; --border:#252B38;
+  --gold:#C9A24A; --gold-soft:#8A7233; --text:#EDEFF3; --muted:#8B93A3; --danger:#E0665C; --ok:#5FBF8A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--text); font-family:'Vazirmatn',sans-serif;
+  min-height:100%; overflow-x:hidden;
+}
+.view{display:none; min-height:100vh; min-height:100%; padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));}
+.view.active{display:flex; flex-direction:column;}
+h1,h2,h3{margin:0; font-weight:700}
+p{margin:0}
+button{font-family:inherit; cursor:pointer; border:none}
+input{font-family:inherit}
+
+/* ---- AUTH ---- */
+#authView{align-items:center; justify-content:center}
+.auth-card{
+  width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:32px 24px;
+}
+.brand{text-align:center; margin-bottom:24px}
+.brand .logo{font-size:28px; font-weight:800; color:var(--gold); letter-spacing:.5px}
+.brand .sub{color:var(--muted); font-size:13px; margin-top:6px}
+.field{margin-bottom:14px}
+.field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+.field input{
+  width:100%; padding:12px 14px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-size:14px;
+}
+.field input:focus{outline:2px solid var(--gold); outline-offset:1px}
+.err{color:var(--danger); font-size:13px; min-height:18px; margin:4px 0 10px}
+.btn-primary{
+  width:100%; padding:13px; background:var(--gold); color:#191305; border-radius:10px;
+  font-weight:700; font-size:15px; margin-top:6px;
+}
+.switch-link{text-align:center; margin-top:16px; font-size:13px; color:var(--muted)}
+.switch-link a{color:var(--gold); cursor:pointer; text-decoration:none}
+
+/* ---- TOPBAR ---- */
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-top:env(safe-area-inset-top,0px)}
+.icon-btn{background:transparent; color:var(--text); font-size:22px; padding:6px 10px; border-radius:8px}
+.icon-btn:hover{background:var(--surface2)}
+.exit-btn{display:flex; align-items:center; gap:6px; background:var(--surface2); color:var(--text); padding:8px 14px; border-radius:10px; font-size:14px}
+
+/* ---- DASHBOARD ---- */
+#dashboardView h2{font-size:20px; margin-bottom:4px}
+#dashboardView .greet{color:var(--muted); font-size:13px; margin-bottom:22px}
+.card-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1}
+@media (max-width:520px){.card-grid{grid-template-columns:1fr}}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px;
+  transition:transform .15s ease, border-color .15s ease; text-align:right;
+}
+.card:hover{transform:translateY(-3px); border-color:var(--gold-soft)}
+.card .emoji{font-size:26px}
+.card h3{font-size:16px; margin:10px 0 6px}
+.card p{color:var(--muted); font-size:13px; line-height:1.6}
+
+/* ---- DRAWER ---- */
+.overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:20}
+.overlay.show{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:-280px; width:260px; height:100%; background:var(--surface);
+  border-left:1px solid var(--border); z-index:21; transition:right .25s ease; padding:20px;
+  padding-top:calc(20px + env(safe-area-inset-top,0px));
+}
+.drawer.show{right:0}
+.drawer h3{font-size:14px; color:var(--muted); margin-bottom:14px}
+.drawer-item{display:block; width:100%; text-align:right; background:transparent; color:var(--text); padding:12px 8px; border-radius:8px; font-size:14px}
+.drawer-item:hover{background:var(--surface2)}
+.drawer .creator{margin-top:20px; padding-top:16px; border-top:1px solid var(--border); font-size:12px; color:var(--muted)}
+
+/* ---- CHAT ---- */
+#chatView{padding-bottom:0}
+.chat-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+.chat-title{font-size:15px; font-weight:600}
+.messages{flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px 2px 12px}
+.msg{max-width:82%; padding:11px 14px; border-radius:14px; font-size:14px; line-height:1.7; white-space:pre-wrap}
+.msg.ai{background:var(--surface); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px}
+.msg.user{background:var(--gold); color:#191305; align-self:flex-end; border-bottom-right-radius:4px}
+.msg-actions{display:flex; gap:8px; margin-top:6px}
+.msg-actions button{background:transparent; color:var(--muted); font-size:12px; padding:2px 4px}
+.msg-actions button:hover{color:var(--gold)}
+.loading-dots{color:var(--muted); font-size:13px; align-self:flex-start}
+.chat-input-bar{
+  display:flex; gap:8px; padding:12px 2px; border-top:1px solid var(--border);
+  padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+}
+.chat-input-bar input{
+  flex:1; padding:12px 14px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text); font-size:14px;
+}
+.round-btn{width:44px; height:44px; border-radius:12px; background:var(--surface2); color:var(--text); font-size:18px; flex-shrink:0}
+.round-btn.active{background:var(--danger); color:#fff}
+.round-btn.send{background:var(--gold); color:#191305}
+.toolbar-row{display:flex; gap:10px; margin-bottom:8px}
+.toolbar-row button{background:transparent; color:var(--muted); font-size:12px; padding:4px 8px; border-radius:6px}
+.toolbar-row button:hover{background:var(--surface2); color:var(--text)}
+
+/* ---- HISTORY ---- */
+.hist-section{margin-bottom:18px}
+.hist-section h3{font-size:14px; color:var(--gold); margin-bottom:8px}
+.hist-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px}
+.hist-item:hover{border-color:var(--gold-soft)}
+.hist-top{display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px}
+.hist-top .date{color:var(--muted); font-size:12px}
+.hist-prev{color:var(--muted); font-size:12px}
+.empty-note{color:var(--muted); font-size:13px; padding:8px 0}
