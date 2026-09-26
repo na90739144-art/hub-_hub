@@ -1,6 +1,6 @@
 :root{
   --bg:#0B0E13; --surface:#12161F; --surface2:#181D28; --border:#252B38;
-  --gold:#C9A24A; --gold-soft:#8A7233; --text:#EDEFF3; --muted:#8B93A3; --danger:#E0665C; --ok:#5FBF8A;
+  --gold:#C9A24A; --gold-soft:#8A7233; --cream:#EDE3C8; --text:#EDEFF3; --muted:#8B93A3; --danger:#E0665C; --ok:#5FBF8A;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -19,7 +19,7 @@ button{font-family:inherit; cursor:pointer; border:none}
 input{font-family:inherit}
 
 /* ---- AUTH ---- */
-#authView{align-items:center; justify-content:center}
+#authView{align-items:center; justify-content:flex-start; padding-top:48px}
 .auth-card{
   width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border);
   border-radius:16px; padding:32px 24px;
@@ -49,7 +49,7 @@ input{font-family:inherit}
 .exit-btn{display:flex; align-items:center; gap:6px; background:var(--surface2); color:var(--text); padding:8px 14px; border-radius:10px; font-size:14px}
 
 /* ---- DASHBOARD ---- */
-#dashboardView h2{font-size:20px; margin-bottom:4px}
+#dashboardView h2{font-size:20px; margin-bottom:4px; color:var(--cream)}
 #dashboardView .greet{color:var(--muted); font-size:13px; margin-bottom:22px}
 .card-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1}
 @media (max-width:520px){.card-grid{grid-template-columns:1fr}}
@@ -59,7 +59,7 @@ input{font-family:inherit}
 }
 .card:hover{transform:translateY(-3px); border-color:var(--gold-soft)}
 .card .emoji{font-size:26px}
-.card h3{font-size:16px; margin:10px 0 6px}
+.card h3{font-size:16px; margin:10px 0 6px; color:var(--cream)}
 .card p{color:var(--muted); font-size:13px; line-height:1.6}
 
 /* ---- DRAWER ---- */
@@ -112,3 +112,6 @@ input{font-family:inherit}
 .hist-top .date{color:var(--muted); font-size:12px}
 .hist-prev{color:var(--muted); font-size:12px}
 .empty-note{color:var(--muted); font-size:13px; padding:8px 0}
+
+/* ---- FOOTER ---- */
+.app-footer{text-align:center; color:var(--cream); font-size:13px; font-weight:500; padding:10px 0 4px; margin-top:auto}
