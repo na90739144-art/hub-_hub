@@ -37,6 +37,37 @@ const SECTIONS = {
 let currentSection = null;
 let currentMessages = [];
 
+/* ---- Extract ===FILE: ...=== blocks and build a downloadable ZIP ---- */
+function extractFiles(text) {
+  const re = /===FILE:\s*(.+?)===\r?\n([\s\S]*?)===END===/g;
+  const files = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    files.push({ path: m[1].trim(), content: m[2] });
+  }
+  return files;
+}
+function formatForDisplay(text) {
+  return text
+    .replace(/===FILE:\s*(.+?)===\r?\n/g, "📄 $1\n")
+    .replace(/===END===\r?\n?/g, "\n");
+}
+async function downloadZip(i) {
+  const files = extractFiles(currentMessages[i].text);
+  if (!files.length || typeof JSZip === "undefined") return;
+  const zip = new JSZip();
+  files.forEach((f) => zip.file(f.path, f.content));
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "hubhub-project.zip";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -190,18 +221,21 @@ function clearChat() {
 function renderMessages() {
   const box = $("messages");
   box.innerHTML = currentMessages
-    .map(
-      (m, i) => `
-    <div class="msg ${m.role === "user" ? "user" : "ai"}">${escapeHtml(m.text)}
+    .map((m, i) => {
+      const hasFiles = m.role === "ai" && extractFiles(m.text).length > 0;
+      const shownText = m.role === "ai" ? formatForDisplay(m.text) : m.text;
+      return `
+    <div class="msg ${m.role === "user" ? "user" : "ai"}">${escapeHtml(shownText)}
       ${
         m.role === "ai"
           ? `<div class="msg-actions">
         <button onclick="copyMsg(${i})">📋 کپی</button>
+        ${hasFiles ? `<button onclick="downloadZip(${i})">📦 دانلود ZIP پروژه</button>` : ""}
       </div>`
           : ""
       }
-    </div>`
-    )
+    </div>`;
+    })
     .join("");
   box.scrollTop = box.scrollHeight;
 }
