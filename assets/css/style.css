@@ -103,6 +103,12 @@ input{font-family:inherit}
 .toolbar-row button{background:transparent; color:var(--muted); font-size:12px; padding:4px 8px; border-radius:6px}
 .toolbar-row button:hover{background:var(--surface2); color:var(--text)}
 
+.zip-cta{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; margin-top:12px; padding:14px 16px; background:var(--gold); color:#191305;
+  font-weight:800; font-size:15px; border-radius:12px;
+}
+
 /* ---- HISTORY ---- */
 .hist-section{margin-bottom:18px}
 .hist-section h3{font-size:14px; color:var(--gold); margin-bottom:8px}
