@@ -12,8 +12,8 @@
  */
 const AI_API_KEY = "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";
 
-/** مدل Groq مورد استفاده (رایگان، کیفیت خوب) */
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+/** مدل Groq مورد استفاده (رایگان، فعال در رده‌ی رایگان) */
+const GROQ_MODEL = "openai/gpt-oss-20b";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
@@ -76,6 +76,6 @@ async function getAIResponse(userText, section) {
     return reply.trim() || "پاسخی دریافت نشد. لطفاً دوباره امتحان کن.";
   } catch (err) {
     console.error("Groq fetch failed:", err);
-    return "در حال حاضر امکان اتصال به هوش مصنوعی نیست. لطفاً اتصال اینترنت را چک کن و دوباره تلاش کن.";
+    return "خطای شبکه در اتصال به Groq:\n" + (err && err.message ? err.message : String(err));
   }
 }
