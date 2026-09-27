@@ -65,7 +65,7 @@ async function getAIResponse(userText, section) {
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
       console.error("Gemini API error:", res.status, errText);
-      return "در حال حاضر امکان اتصال به هوش مصنوعی نیست (خطای سرور). لطفاً دوباره تلاش کن.";
+      return "خطای سرور Gemini (کد " + res.status + "):\n" + errText.slice(0, 500);
     }
 
     const data = await res.json();
