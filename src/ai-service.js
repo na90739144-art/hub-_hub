@@ -3,49 +3,46 @@
    این فایل تنها جایی است که باید برای وصل کردن هوش مصنوعی واقعی تغییر بدی.
    ========================================================================== */
 
-/**
- * کلید API هوش مصنوعی (Groq).
- * توجه امنیتی: این کلید در کد سمت مرورگر قرار دارد، یعنی هر کسی که سایت را
- * باز کند و View Source بزند می‌تواند آن را ببیند و از سهمیه‌ی رایگانت استفاده کند.
- * فعلاً برای تست/استفاده‌ی شخصی مشکلی ندارد؛ برای یک سایت عمومی، بهتر است این
- * تماس از طریق یک بک‌اند ساده انجام شود تا کلید مخفی بماند.
- */
 const AI_API_KEY = "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";
 
-/** مدل Groq مورد استفاده (رایگان، فعال در رده‌ی رایگان) */
 const GROQ_MODEL = "openai/gpt-oss-20b";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
- * دستورالعمل هر بخش، برای اینکه هوش مصنوعی متناسب با همون نقش جواب بده.
+ * فرمت مخصوص خروجی فایل‌های پروژه، که فرانت‌اند از رویش فایل‌ها را برای ساخت ZIP استخراج می‌کند:
+ * ===FILE: path/name.ext===
+ * <محتوای فایل>
+ * ===END===
  */
+const FILE_FORMAT_RULE =
+  "If the user gives you a complete build prompt for a full project, generate the necessary project files. " +
+  "Output each file using EXACTLY this format, one block per file:\n" +
+  "===FILE: path/filename.ext===\n<full file content>\n===END===\n" +
+  "Include as many files as the project needs (index.html, package.json, README.md, source files, etc). " +
+  "You may add a short explanation in Persian before or after the file blocks, but the file blocks themselves must follow the exact format above so they can be packaged into a ZIP. " +
+  "If the user is just chatting, asking questions, or the idea is not complete yet, respond normally in Persian and do NOT use the file format — ask clarifying questions if needed.";
+
 const SECTION_INSTRUCTIONS = {
   idea:
     "You are Hub Hub's Idea-to-Prompt assistant. The user will describe an idea in Persian or English. " +
     "Turn it into one detailed, professional AI prompt written in English, ready to paste into another AI tool. " +
     "Return ONLY the final prompt text, no extra commentary.",
   website:
-    "تو دستیار طراحی وب‌سایت Hub Hub هستی. ایده‌ی سایت کاربر را تحلیل کن، اگر اطلاعات مهمی کم بود سوال بپرس، " +
-    "و در نهایت یک برنامه‌ی فنی و ساختار پروژه‌ی پیشنهادی ارائه بده. به فارسی پاسخ بده.",
+    "تو دستیار طراحی وب‌سایت Hub Hub هستی و مثل یک هوش مصنوعی کامل عمل می‌کنی — به هر سوالی که کاربر بپرسد جواب بده. " +
+    FILE_FORMAT_RULE,
   android:
-    "تو دستیار طراحی اپلیکیشن اندروید Hub Hub هستی. ایده‌ی اپلیکیشن کاربر را تحلیل کن، در صورت نیاز سوال بپرس، " +
-    "تکنولوژی مناسب (Kotlin, Flutter, React Native و ...) را پیشنهاد بده و ساختار پروژه را توضیح بده. به فارسی پاسخ بده.",
+    "تو دستیار طراحی اپلیکیشن اندروید Hub Hub هستی و مثل یک هوش مصنوعی کامل عمل می‌کنی — به هر سوالی که کاربر بپرسد جواب بده. " +
+    "تکنولوژی مناسب (Kotlin, Flutter, React Native و ...) را بر اساس نیاز پروژه انتخاب کن. " +
+    FILE_FORMAT_RULE,
   consultant:
-    "تو مشاور پروژه‌های برنامه‌نویسی Hub Hub هستی. فقط مشاوره بده (معماری، تکنولوژی، دیباگ، مسیر توسعه)، " +
-    "هیچ‌وقت فایل یا ZIP تولید نکن. به فارسی و مختصر و مفید پاسخ بده.",
+    "تو مشاور پروژه‌های برنامه‌نویسی Hub Hub هستی و مثل یک هوش مصنوعی کامل عمل می‌کنی — به هر سوالی که کاربر بپرسد جواب بده، محدود به مشاوره نیستی. " +
+    "فقط هیچ‌وقت از فرمت فایل/ZIP استفاده نکن، این بخش فایل پروژه تولید نمی‌کند. به فارسی پاسخ بده.",
 };
 
-/**
- * تولید پاسخ هوش مصنوعی برای یک بخش مشخص (idea | website | android | consultant).
- * اگر AI_API_KEY خالی باشد، پاسخ نمونه (mock) برگردانده می‌شود.
- */
 async function getAIResponse(userText, section) {
   if (!AI_API_KEY) {
     await new Promise((r) => setTimeout(r, 600));
-    return (
-      "پیام شما دریافت شد: «" + userText + "»\n\n" +
-      "[این پاسخ نمونه است. کلید AI هنوز تنظیم نشده.]"
-    );
+    return "پیام شما دریافت شد: «" + userText + "»\n\n[این پاسخ نمونه است. کلید AI هنوز تنظیم نشده.]";
   }
 
   try {
