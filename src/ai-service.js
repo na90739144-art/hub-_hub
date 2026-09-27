@@ -4,17 +4,17 @@
    ========================================================================== */
 
 /**
- * کلید API هوش مصنوعی (Google Gemini).
+ * کلید API هوش مصنوعی (Groq).
  * توجه امنیتی: این کلید در کد سمت مرورگر قرار دارد، یعنی هر کسی که سایت را
  * باز کند و View Source بزند می‌تواند آن را ببیند و از سهمیه‌ی رایگانت استفاده کند.
  * فعلاً برای تست/استفاده‌ی شخصی مشکلی ندارد؛ برای یک سایت عمومی، بهتر است این
  * تماس از طریق یک بک‌اند ساده انجام شود تا کلید مخفی بماند.
  */
-const AI_API_KEY = "AQ.Ab8RN6IIiQozTxVeng428uj7QfWp8CQhSCLwuRPUIwrUl5wA5w";
+const AI_API_KEY = "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";
 
-/** مدل Gemini مورد استفاده */
-const GEMINI_MODEL = "gemini-flash-latest";
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+/** مدل Groq مورد استفاده (رایگان، کیفیت خوب) */
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
  * دستورالعمل هر بخش، برای اینکه هوش مصنوعی متناسب با همون نقش جواب بده.
@@ -50,29 +50,32 @@ async function getAIResponse(userText, section) {
 
   try {
     const instruction = SECTION_INSTRUCTIONS[section] || SECTION_INSTRUCTIONS.consultant;
-    const res = await fetch(GEMINI_ENDPOINT, {
+    const res = await fetch(GROQ_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-goog-api-key": AI_API_KEY,
+        "Authorization": "Bearer " + AI_API_KEY,
       },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: instruction }] },
-        contents: [{ parts: [{ text: userText }] }],
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: instruction },
+          { role: "user", content: userText },
+        ],
       }),
     });
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      console.error("Gemini API error:", res.status, errText);
-      return "خطای سرور Gemini (کد " + res.status + "):\n" + errText.slice(0, 500);
+      console.error("Groq API error:", res.status, errText);
+      return "خطای سرور Groq (کد " + res.status + "):\n" + errText.slice(0, 500);
     }
 
     const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
+    const reply = data?.choices?.[0]?.message?.content || "";
     return reply.trim() || "پاسخی دریافت نشد. لطفاً دوباره امتحان کن.";
   } catch (err) {
-    console.error("Gemini fetch failed:", err);
+    console.error("Groq fetch failed:", err);
     return "در حال حاضر امکان اتصال به هوش مصنوعی نیست. لطفاً اتصال اینترنت را چک کن و دوباره تلاش کن.";
   }
 }
