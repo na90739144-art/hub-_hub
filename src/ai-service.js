@@ -9,17 +9,16 @@ const GROQ_MODEL = "openai/gpt-oss-20b";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
- * فرمت مخصوص خروجی فایل‌های پروژه، که فرانت‌اند از رویش فایل‌ها را برای ساخت ZIP استخراج می‌کند:
- * ===FILE: path/name.ext===
- * <محتوای فایل>
- * ===END===
+ * فرمت مخصوص خروجی فایل‌های پروژه، که فرانت‌اند از رویش فایل‌ها را برای ساخت ZIP استخراج می‌کند.
  */
 const FILE_FORMAT_RULE =
-  "If the user gives you a complete build prompt for a full project, generate the necessary project files. " +
-  "Output each file using EXACTLY this format, one block per file:\n" +
-  "===FILE: path/filename.ext===\n<full file content>\n===END===\n" +
-  "Include as many files as the project needs (index.html, package.json, README.md, source files, etc). " +
-  "You may add a short explanation in Persian before or after the file blocks, but the file blocks themselves must follow the exact format above so they can be packaged into a ZIP. " +
+  "If the user gives you a complete build prompt for a full project, you MUST generate the project files. " +
+  "This is MANDATORY: every single file you produce (code, gradle, manifest, README, etc.) must be wrapped EXACTLY like this, " +
+  "with nothing else around the markers on their own lines:\n" +
+  "===FILE: path/filename.ext===\n<full file content here>\n===END===\n" +
+  "Do NOT use normal markdown code fences (```) or markdown tables for file content — ONLY the ===FILE:===/===END=== format above. " +
+  "Example:\n===FILE: app/build.gradle===\napply plugin: 'com.android.application'\n===END===\n" +
+  "Keep prose explanation SHORT (a few lines in Persian max) and prioritize outputting the actual files — the files are what matters most, not lengthy tables or architecture essays. " +
   "If the user is just chatting, asking questions, or the idea is not complete yet, respond normally in Persian and do NOT use the file format — ask clarifying questions if needed.";
 
 const SECTION_INSTRUCTIONS = {
@@ -58,6 +57,7 @@ async function getAIResponse(userText, section) {
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
+        max_tokens: 8000,
         messages: [
           { role: "system", content: instruction },
           { role: "user", content: userText },
@@ -73,7 +73,12 @@ async function getAIResponse(userText, section) {
 
     const data = await res.json();
     const reply = data?.choices?.[0]?.message?.content || "";
-    return reply.trim() || "پاسخی دریافت نشد. لطفاً دوباره امتحان کن.";
+    const finishReason = data?.choices?.[0]?.finish_reason;
+    let out = reply.trim() || "پاسخی دریافت نشد. لطفاً دوباره امتحان کن.";
+    if (finishReason === "length") {
+      out += "\n\n⚠️ پاسخ به‌خاطر طولانی بودن ناتمام مونده. برای پروژه‌های بزرگ، ایده رو در چند پیام کوچک‌تر (مثلاً یک بخش در هر پیام) بفرست.";
+    }
+    return out;
   } catch (err) {
     console.error("Groq fetch failed:", err);
     return "خطای شبکه در اتصال به Groq:\n" + (err && err.message ? err.message : String(err));
