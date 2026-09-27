@@ -144,6 +144,49 @@ function logout() {
 function enterApp() {
   const s = JSON.parse(sessionStorage.getItem("hubhub_session") || "null");
   $("greetName").textContent = s ? "سلام " + s.name + "، خوش اومدی" : "خوش اومدی";
+  if (!localStorage.getItem("hubhub_onboarding_seen")) {
+    onbIndex = 0;
+    renderOnboarding();
+    showView("onboarding");
+  } else {
+    showView("dashboard");
+  }
+}
+
+/* ---- ONBOARDING SLIDES ---- */
+const ONB_SLIDES = [
+  { emoji: "💡", title: "مشاور پروژه", body: "ایده‌ای برای یک پروژه دارید؟\nدر بخش «مشاور پروژه» می‌توانید تمام جزئیات ایده، اهداف و امکانات موردنظرتان را با ما در میان بگذارید." },
+  { emoji: "🧠", title: "بررسی و تکمیل ایده", body: "ایده شما بررسی می‌شود و نقاط ضعف، کمبودها و بخش‌هایی که نیاز به بهبود دارند، شناسایی می‌شوند.\nسپس پیشنهادهای لازم برای کامل‌تر و حرفه‌ای‌تر شدن پروژه ارائه خواهد شد." },
+  { emoji: "🚀", title: "آماده‌سازی پروژه", body: "پس از بررسی، ایده شما به یک طرح کامل و منسجم تبدیل می‌شود تا برای مرحله اجرا آماده باشد." },
+  { emoji: "✍️", title: "دریافت پرامپت حرفه‌ای", body: "پس از تکمیل ایده، می‌توانید به بخش «ایده‌ات را وارد کن، پرامپت بگیر» بروید و یک پرامپت حرفه‌ای و دقیق برای اجرای پروژه دریافت کنید." },
+  { emoji: "📱💻", title: "طراحی سایت یا اپلیکیشن", body: "در مرحله بعد، می‌توانید پروژه خود را در بخش «طراحی سایت» یا «طراحی اپلیکیشن اندروید» وارد کنید و از پرامپت آماده‌شده برای شروع طراحی و توسعه استفاده کنید." },
+  { emoji: "✨", title: "از ایده تا اجرا", body: "ایده خود را وارد کنید، آن را کامل و حرفه‌ای کنید، پرامپت مناسب دریافت کنید و سپس وارد مرحله طراحی شوید؛\nهمه‌چیز برای تبدیل ایده شما به یک پروژه واقعی آماده است." },
+];
+let onbIndex = 0;
+function renderOnboarding() {
+  const s = ONB_SLIDES[onbIndex];
+  $("onbCard").innerHTML =
+    `<div class="onb-emoji">${s.emoji}</div><h3>${s.title}</h3><p>${escapeHtml(s.body).replace(/\n/g, "<br>")}</p>`;
+  $("onbDots").innerHTML = ONB_SLIDES.map((_, i) => `<span class="${i === onbIndex ? "active" : ""}"></span>`).join("");
+  $("onbPrevBtn").style.visibility = onbIndex === 0 ? "hidden" : "visible";
+  $("onbNextBtn").textContent = onbIndex === ONB_SLIDES.length - 1 ? "شروع کنید" : "بعدی";
+}
+function onbNext() {
+  if (onbIndex < ONB_SLIDES.length - 1) {
+    onbIndex++;
+    renderOnboarding();
+  } else {
+    onbFinish();
+  }
+}
+function onbPrev() {
+  if (onbIndex > 0) {
+    onbIndex--;
+    renderOnboarding();
+  }
+}
+function onbFinish() {
+  localStorage.setItem("hubhub_onboarding_seen", "1");
   showView("dashboard");
 }
 (function init() {
