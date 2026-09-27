@@ -296,9 +296,8 @@ function renderMessages() {
         m.role === "ai"
           ? `<div class="msg-actions">
         <button onclick="copyMsg(${i})">📋 کپی</button>
-        ${hasFiles ? `<button onclick="downloadZip(${i})">📦 دانلود ZIP پروژه</button>` : ""}
         ${isLong ? `<button onclick="downloadTxt(${i})">📄 دانلود TXT</button>` : ""}
-      </div>`
+      </div>${hasFiles ? `<button class="zip-cta" onclick="downloadZip(${i})">📦 دانلود ZIP پروژه</button>` : ""}`
           : ""
       }
     </div>`;
