@@ -45,6 +45,17 @@ function extractFiles(text) {
   while ((m = re.exec(text)) !== null) {
     files.push({ path: m[1].trim(), content: m[2] });
   }
+  if (files.length) return files;
+  return extractFilesFallback(text);
+}
+/* Fallback: `filename.ext` heading followed by a ```code``` fence (in case the model used plain markdown) */
+function extractFilesFallback(text) {
+  const re = /`([\w./-]+\.\w{1,10})`[^\n]*\n+```[a-zA-Z0-9]*\n([\s\S]*?)```/g;
+  const files = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    files.push({ path: m[1].trim(), content: m[2] });
+  }
   return files;
 }
 function formatForDisplay(text) {
@@ -62,6 +73,17 @@ async function downloadZip(i) {
   const a = document.createElement("a");
   a.href = url;
   a.download = "hubhub-project.zip";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function downloadTxt(i) {
+  const blob = new Blob([currentMessages[i].text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "hubhub-response.txt";
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -266,6 +288,7 @@ function renderMessages() {
   box.innerHTML = currentMessages
     .map((m, i) => {
       const hasFiles = m.role === "ai" && extractFiles(m.text).length > 0;
+      const isLong = m.role === "ai" && !hasFiles && m.text.length > 600;
       const shownText = m.role === "ai" ? formatForDisplay(m.text) : m.text;
       return `
     <div class="msg ${m.role === "user" ? "user" : "ai"}">${escapeHtml(shownText)}
@@ -274,6 +297,7 @@ function renderMessages() {
           ? `<div class="msg-actions">
         <button onclick="copyMsg(${i})">📋 کپی</button>
         ${hasFiles ? `<button onclick="downloadZip(${i})">📦 دانلود ZIP پروژه</button>` : ""}
+        ${isLong ? `<button onclick="downloadTxt(${i})">📄 دانلود TXT</button>` : ""}
       </div>`
           : ""
       }
