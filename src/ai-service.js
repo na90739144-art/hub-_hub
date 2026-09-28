@@ -1,16 +1,23 @@
 /* ==========================================================================
-   HUB HUB — AI SERVICE LAYER
-   این فایل تنها جایی است که باید برای وصل کردن هوش مصنوعی واقعی تغییر بدی.
+   HUB HUB — BACKEND (AI proxy)
+   کلید هوش مصنوعی فقط اینجا (متغیر محیطی GROQ_API_KEY) نگهداری می‌شود.
    ========================================================================== */
+const express = require("express");
+const cors = require("cors");
 
-const AI_API_KEY = "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";
+const app = express();
+app.set("trust proxy", 1);
 
-const GROQ_MODEL = "openai/gpt-oss-20b";
+const PORT = process.env.PORT || 3000;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
 
-/**
- * فرمت مخصوص خروجی فایل‌های پروژه، که فرانت‌اند از رویش فایل‌ها را برای ساخت ZIP استخراج می‌کند.
- */
+app.use(cors({ origin: ALLOWED_ORIGIN || false }));
+app.use(express.json({ limit: "1mb" }));
+
+/* ---- Prompts per section (kept server-side) ---- */
 const FILE_FORMAT_RULE =
   "If the user gives you a complete build prompt for a full project, you MUST generate the project files. " +
   "This is MANDATORY: every single file you produce (code, gradle, manifest, README, etc.) must be wrapped EXACTLY like this, " +
@@ -41,46 +48,75 @@ const SECTION_INSTRUCTIONS = {
     "فقط هیچ‌وقت از فرمت فایل/ZIP استفاده نکن، این بخش فایل پروژه تولید نمی‌کند. به فارسی پاسخ بده.",
 };
 
-async function getAIResponse(userText, section) {
-  if (!AI_API_KEY) {
-    await new Promise((r) => setTimeout(r, 600));
-    return "پیام شما دریافت شد: «" + userText + "»\n\n[این پاسخ نمونه است. کلید AI هنوز تنظیم نشده.]";
+/* ---- Simple per-IP rate limit (protects the free quota) ---- */
+const hits = new Map();
+function rateLimit(req, res, next) {
+  const now = Date.now();
+  const rec = hits.get(req.ip) || { count: 0, start: now };
+  if (now - rec.start > 60_000) {
+    rec.count = 0;
+    rec.start = now;
+  }
+  rec.count++;
+  hits.set(req.ip, rec);
+  if (rec.count > 20) return res.status(429).json({ error: "too_many_requests" });
+  next();
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, rec] of hits) if (now - rec.start > 120_000) hits.delete(ip);
+}, 300_000);
+
+/* ---- Routes ---- */
+app.get("/", (req, res) => res.send("Hub Hub API is running"));
+
+app.post("/api/ai", rateLimit, async (req, res) => {
+  const { message, section } = req.body || {};
+
+  if (typeof message !== "string" || !message.trim() || message.length > 20000) {
+    return res.status(400).json({ error: "invalid_message" });
+  }
+  if (!Object.prototype.hasOwnProperty.call(SECTION_INSTRUCTIONS, section)) {
+    return res.status(400).json({ error: "invalid_section" });
+  }
+  if (!GROQ_API_KEY) {
+    console.error("GROQ_API_KEY is not set");
+    return res.status(500).json({ error: "server_not_configured" });
   }
 
   try {
-    const instruction = SECTION_INSTRUCTIONS[section] || SECTION_INSTRUCTIONS.consultant;
-    const res = await fetch(GROQ_ENDPOINT, {
+    const r = await fetch(GROQ_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + AI_API_KEY,
+        Authorization: "Bearer " + GROQ_API_KEY,
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
         max_tokens: 8000,
         messages: [
-          { role: "system", content: instruction },
-          { role: "user", content: userText },
+          { role: "system", content: SECTION_INSTRUCTIONS[section] },
+          { role: "user", content: message },
         ],
       }),
     });
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.error("Groq API error:", res.status, errText);
-      return "خطای سرور Groq (کد " + res.status + "):\n" + errText.slice(0, 500);
+    if (!r.ok) {
+      const errText = await r.text().catch(() => "");
+      console.error("Groq error:", r.status, errText.slice(0, 500));
+      return res.status(502).json({ error: "ai_unavailable", status: r.status });
     }
 
-    const data = await res.json();
-    const reply = data?.choices?.[0]?.message?.content || "";
-    const finishReason = data?.choices?.[0]?.finish_reason;
-    let out = reply.trim() || "پاسخی دریافت نشد. لطفاً دوباره امتحان کن.";
-    if (finishReason === "length") {
-      out += "\n\n⚠️ پاسخ به‌خاطر طولانی بودن ناتمام مونده. برای پروژه‌های بزرگ، ایده رو در چند پیام کوچک‌تر (مثلاً یک بخش در هر پیام) بفرست.";
-    }
-    return out;
+    const data = await r.json();
+    const choice = data?.choices?.[0];
+    res.json({
+      reply: choice?.message?.content || "",
+      finishReason: choice?.finish_reason || null,
+    });
   } catch (err) {
-    console.error("Groq fetch failed:", err);
-    return "خطای شبکه در اتصال به Groq:\n" + (err && err.message ? err.message : String(err));
+    console.error("Proxy failure:", err);
+    res.status(502).json({ error: "ai_unavailable" });
   }
-}
+});
+
+app.listen(PORT, () => console.log("Hub Hub API listening on port " + PORT));
