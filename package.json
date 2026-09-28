@@ -1,14 +1,17 @@
 {
-  "name": "hub-hub",
+  "name": "hub-hub-backend",
   "version": "1.0.0",
-  "description": "Hub Hub — Zero to One Hundred Programming with AI. Created by Nima Hojjati.",
-  "author": "Nima Hojjati",
-  "license": "MIT",
+  "description": "Hub Hub AI proxy - keeps the AI API key on the server, never in the browser.",
   "private": true,
+  "main": "server.js",
   "scripts": {
-    "start": "npx serve . -l 3000"
+    "start": "node server.js"
   },
-  "devDependencies": {
-    "serve": "^14.2.0"
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
