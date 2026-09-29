@@ -1,0 +1,17 @@
+{
+  "name": "hub-hub-backend",
+  "version": "1.0.0",
+  "description": "Hub Hub AI proxy - keeps the AI API key on the server, never in the browser.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
