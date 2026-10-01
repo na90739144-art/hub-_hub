@@ -5,10 +5,10 @@
    ========================================================================== */
 
 /** آدرس سرور Render بعد از دیپلوی، مثلاً: https://hub-hub-api.onrender.com/api/ai */
-const AI_BACKEND_URL = "https://YOUR-SERVICE-NAME.onrender.com/api/ai";
+const AI_BACKEND_URL = "https://hub-hub.onrender.com/api/ai";
 
 async function getAIResponse(userText, section) {
-  if (AI_BACKEND_URL.includes("YOUR-SERVICE-NAME")) {
+  if (!AI_BACKEND_URL || AI_BACKEND_URL.includes("YOUR-SERVICE-NAME")) {
     await new Promise((r) => setTimeout(r, 600));
     return (
       "پیام شما دریافت شد: «" + userText + "»\n\n" +
