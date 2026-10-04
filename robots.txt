@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://na90739144-art.github.io/hub-_hub/sitemap.xml
