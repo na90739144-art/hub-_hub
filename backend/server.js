@@ -14,6 +14,10 @@ const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
 
+app.use((req, res, next) => {
+  console.log("Incoming request origin:", req.headers.origin, "| configured ALLOWED_ORIGIN:", ALLOWED_ORIGIN);
+  next();
+});
 app.use(cors({ origin: ALLOWED_ORIGIN || false }));
 app.use(express.json({ limit: "1mb" }));
 
